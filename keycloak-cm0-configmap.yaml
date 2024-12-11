@@ -1,0 +1,10 @@
+apiVersion: v1
+binaryData:
+  localtime: VkZwcFpqSUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFRQUFBQVFBQUFBQUFBQlZWRU1BVkZwcFpqSUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFRQUFBQVFBQUFBQUFBQlZWRU1BQ2xWVVF6QUs=
+kind: ConfigMap
+metadata:
+  annotations:
+    use-subpath: "true"
+  labels:
+    io.kompose.service: keycloak
+  name: keycloak-cm0
