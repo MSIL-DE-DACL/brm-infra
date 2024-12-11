@@ -1,0 +1,389 @@
+services:
+  frontend:
+    container_name: brm-platform-app
+    build:
+      context: ../brm-platform-app
+      dockerfile: Dockerfile
+    ports:
+      - "7000:8080"
+    restart: unless-stopped
+    environment:
+      - PORT=8080
+      - ENVIRONMENT=production
+      - APP_NAME=brm-platform-app
+      - LOGIN_API_PATH=https://brm.marutisuzukidataverse.com/api/auth/sign-in
+      - USER_INFO_API_PATH=https://brm.marutisuzukidataverse.com/api/auth/user-info
+      - LOGOUT_REDIRECT_PATH=https://brm.marutisuzukidataverse.com/
+      - LOGOUT_API_PATH=https://brm.marutisuzukidataverse.com/api/auth/sign-out
+      - REFRESH_API_PATH=https://brm.marutisuzukidataverse.com/api/auth/refresh
+      - USER_LIST_API_PATH=https://brm.marutisuzukidataverse.com/api/admin/get-user-list
+      - APP_NAME=brm-platform-app
+      - WIDGET_SERVICE_PATH=http://widget-service:7003/
+      - BRM_SERVICE_PATH=http://brm-service:7009/brm/
+      - ADMIN_SERVICE_PATH=http://admin-service:7004/
+      - DATA_UPLOAD_SERVICE=https://brm.marutisuzukidataverse.com/
+      - WORKFLOW_SERVICE=http://workflow-service:7008/
+      - NOTIFICATION_SERVICE=http://notification-service:7005/
+ 
+  keycloak:
+    container_name: brm-keycloak
+    image: keycloak/keycloak:26.0
+    ports:
+      - 7001:8080
+    restart: unless-stopped
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./keycloak/themes/brm:/opt/keycloak/themes/brm
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: Us!ngBRM
+      KC_DB: postgres
+      KC_HTTP_RELATIVE_PATH: /keycloak
+      KC_DB_URL: jdbc:postgresql://postgres:5432/brm_db
+      KC_DB_USERNAME: brm_user
+      KC_DB_PASSWORD: brm_password
+      KC_PROXY: edge
+      KC_HOSTNAME: https://brm.marutisuzukidataverse.com/keycloak
+    command: start
+    networks:
+      - keycloak-and-db-network
+ 
+  postgres:
+    container_name: brm-postgres
+    image: postgres:16.0
+    ports:
+      - 5432:5432
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: brm_db
+      POSTGRES_USER: brm_user
+      POSTGRES_PASSWORD: brm_password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - keycloak-and-db-network
+ 
+  auth:
+    container_name: brm-auth-service
+    build:
+      context: ../brm-auth-service
+      dockerfile: Dockerfile
+    ports:
+      - "7002:7002"
+    restart: unless-stopped
+    environment:
+      - APP_NAME=brm-auth
+      - NODE_ENV=production
+      - PORT=7002
+      - LOGGER_LOG_LEVEL=debug
+      - SERVER_SHUTDOWN_GRACE_PERIOD_MS=2000
+      - AUTH_SUCCESS_REDIRECT_URL=https://brm.marutisuzukidataverse.com
+      - AUTH_FAILURE_REDIRECT_URL=https://brm.marutisuzukidataverse.com/api/auth/sign-in
+      - AUTH_COOKIE_DOMAIN=brm.marutisuzukidataverse.com
+      - AUTH_COOKIE_SECURE=true
+      - JWT_ISSUER=https://brm.marutisuzukidataverse.com/keycloak/realms/brm
+      - JWT_JWKS_URI=https://brm.marutisuzukidataverse.com/keycloak/realms/brm/protocol/openid-connect/certs
+      - JWT_SECRET="my_secret"
+      - JWT_ALGORITHM_FOR_TOKEN='HS256'
+      - KEYCLOAK_OIDC_CONNFIG_ENDPOINT=https://brm.marutisuzukidataverse.com/keycloak/realms/brm/.well-known/openid-configuration
+      - KEYCLOAK_CLIENT_ID=brm
+      - KEYCLOAK_CLIENT_SECRET=cXyIy9JBcAeH6K4rPAHLFGnB5EfCvs7V
+      - KEYCLOAK_REDIRECT_URI=https://brm.marutisuzukidataverse.com/api/auth/callback
+      - KEYCLOAK_AUTH_SCOPES=openid email profile
+      - KEYCLOAK_BASE_URL=https://brm.marutisuzukidataverse.com/keycloak
+      - KEYCLOAK_CLIENT_ID_REST=rest-client
+      - KEYCLOAK_CLIENT_SECRET_REST=qnuIVavwKVKLLK712jlxMKOiKm32YHKk
+      - KEYCLOAK_GRANT_TYPE=client_credentials
+      - KEYCLOAK_REALM_NAME=brm
+      - KEYCLOAK_USERNAME=rest-client
+      - JWT_SECRET=my_secret
+      - JWT_ALGORITHM_FOR_TOKEN=HS256
+      - SIGNIN_REDIRECT_ALLOWED_HOSTS=brm.marutisuzukidataverse.com,localhost
+      - OPENAPI_BASE_SCHEMA=dist/api.schema.yml
+ 
+  widget-service:
+    container_name: brm-widget-service
+    build:
+      context: ../brm-widget-service
+      dockerfile: Dockerfile
+    ports:
+      - "7003:7003"
+    restart: unless-stopped
+    environment:
+      - APP_NAME=brm-widget
+      - NODE_ENV=production
+      - PORT=7003
+      - LOGGER_LOG_LEVEL=debug
+      - SERVER_SHUTDOWN_GRACE_PERIOD_MS=2000
+      - AUTH_SUCCESS_REDIRECT_URL=https://brm.marutisuzukidataverse.com
+      - AUTH_FAILURE_REDIRECT_URL=https://brm.marutisuzukidataverse.com/api/auth/sign-in
+      - AUTH_COOKIE_DOMAIN=brm.marutisuzukidataverse.com
+      - AUTH_COOKIE_SECURE=true
+      - JWT_ISSUER=https://brm.marutisuzukidataverse.com/keycloak/realms/brm
+      - JWT_JWKS_URI=https://brm.marutisuzukidataverse.com/keycloak/realms/brm/protocol/openid-connect/certs
+      - JWT_SECRET="my_secret"
+      - JWT_ALGORITHM_FOR_TOKEN='HS256'
+      - KEYCLOAK_OIDC_CONNFIG_ENDPOINT=https://brm.marutisuzukidataverse.com/keycloak/realms/brm/.well-known/openid-configuration
+      - KEYCLOAK_CLIENT_ID=brm
+      - KEYCLOAK_CLIENT_SECRET=cXyIy9JBcAeH6K4rPAHLFGnB5EfCvs7V
+      - KEYCLOAK_REDIRECT_URI=https://brm.marutisuzukidataverse.com/api/auth/callback
+      - KEYCLOAK_AUTH_SCOPES=openid email profile
+      - KEYCLOAK_BASE_URL=https://brm.marutisuzukidataverse.com/keycloak
+      - KEYCLOAK_CLIENT_ID_REST=rest-client
+      - KEYCLOAK_CLIENT_SECRET_REST=qnuIVavwKVKLLK712jlxMKOiKm32YHKk
+      - KEYCLOAK_GRANT_TYPE=client_credentials
+      - KEYCLOAK_REALM_NAME=brm
+      - KEYCLOAK_USERNAME=rest-client
+      - JWT_SECRET=my_secret
+      - JWT_ALGORITHM_FOR_TOKEN=HS256
+      - SIGNIN_REDIRECT_ALLOWED_HOSTS=brm.marutisuzukidataverse.com,localhost
+      - OPENAPI_BASE_SCHEMA=dist/api.schema.yml
+      - POSTGRES_DATABASE_URL=postgresql://brm_user:brm_password@172.31.96.186:5432/brm
+ 
+  admin-service:
+    container_name: brm-admin-service
+    build:
+      context: ../brm-admin-service
+      dockerfile: Dockerfile
+    ports:
+      - "7004:7004"
+    restart: unless-stopped
+    environment:
+      - APP_NAME=brm-admin-service
+      - NODE_ENV=production
+      - PORT=7004
+      - LOGGER_LOG_LEVEL=debug
+      - SERVER_SHUTDOWN_GRACE_PERIOD_MS=2000
+      - AUTH_SUCCESS_REDIRECT_URL=https://brm.marutisuzukidataverse.com
+      - AUTH_FAILURE_REDIRECT_URL=https://brm.marutisuzukidataverse.com/api/auth/sign-in
+      - AUTH_COOKIE_DOMAIN=brm.marutisuzukidataverse.com
+      - AUTH_COOKIE_SECURE=true
+      - JWT_ISSUER=https://brm.marutisuzukidataverse.com/keycloak/realms/brm
+      - JWT_JWKS_URI=https://brm.marutisuzukidataverse.com/keycloak/realms/brm/protocol/openid-connect/certs
+      - JWT_SECRET="my_secret"
+      - JWT_ALGORITHM_FOR_TOKEN='HS256'
+      - KEYCLOAK_OIDC_CONNFIG_ENDPOINT=https://brm.marutisuzukidataverse.com/keycloak/realms/brm/.well-known/openid-configuration
+      - KEYCLOAK_CLIENT_ID=brm
+      - KEYCLOAK_CLIENT_SECRET=cXyIy9JBcAeH6K4rPAHLFGnB5EfCvs7V
+      - KEYCLOAK_REDIRECT_URI=https://brm.marutisuzukidataverse.com/api/auth/callback
+      - KEYCLOAK_AUTH_SCOPES=openid email profile
+      - KEYCLOAK_BASE_URL=https://brm.marutisuzukidataverse.com/keycloak
+      - KEYCLOAK_CLIENT_ID_REST=rest-client
+      - KEYCLOAK_CLIENT_SECRET_REST=qnuIVavwKVKLLK712jlxMKOiKm32YHKk
+      - KEYCLOAK_GRANT_TYPE=client_credentials
+      - KEYCLOAK_REALM_NAME=brm
+      - KEYCLOAK_USERNAME=rest-client
+      - JWT_SECRET=my_secret
+      - JWT_ALGORITHM_FOR_TOKEN=HS256
+      - SIGNIN_REDIRECT_ALLOWED_HOSTS=brm.marutisuzukidataverse.com,localhost
+      - OPENAPI_BASE_SCHEMA=dist/api.schema.yml
+      - POSTGRES_DATABASE_URL=postgresql://brm_user:brm_password@172.31.96.186:5432/brm
+ 
+  notification-service:
+    container_name: brm-notification-service
+    build:
+      context: ../brm-notification-service
+      dockerfile: Dockerfile
+    ports:
+      - "7005:7005"
+    restart: unless-stopped
+    environment:
+      - APP_NAME=brm-notification-service
+      - NODE_ENV=production
+      - PORT=7005
+      - LOGGER_LOG_LEVEL=debug
+      - SERVER_SHUTDOWN_GRACE_PERIOD_MS=2000
+      - AUTH_SUCCESS_REDIRECT_URL=https://brm.marutisuzukidataverse.com
+      - AUTH_FAILURE_REDIRECT_URL=https://brm.marutisuzukidataverse.com/api/auth/sign-in
+      - AUTH_COOKIE_DOMAIN=brm.marutisuzukidataverse.com
+      - AUTH_COOKIE_SECURE=true
+      - JWT_ISSUER=https://brm.marutisuzukidataverse.com/keycloak/realms/brm
+      - JWT_JWKS_URI=https://brm.marutisuzukidataverse.com/keycloak/realms/brm/protocol/openid-connect/certs
+      - JWT_SECRET="my_secret"
+      - JWT_ALGORITHM_FOR_TOKEN='HS256'
+      - KEYCLOAK_OIDC_CONNFIG_ENDPOINT=https://brm.marutisuzukidataverse.com/keycloak/realms/brm/.well-known/openid-configuration
+      - KEYCLOAK_CLIENT_ID=brm
+      - KEYCLOAK_CLIENT_SECRET=cXyIy9JBcAeH6K4rPAHLFGnB5EfCvs7V
+      - KEYCLOAK_REDIRECT_URI=https://brm.marutisuzukidataverse.com/api/auth/callback
+      - KEYCLOAK_AUTH_SCOPES=openid email profile
+      - KEYCLOAK_BASE_URL=https://brm.marutisuzukidataverse.com/keycloak
+      - KEYCLOAK_CLIENT_ID_REST=rest-client
+      - KEYCLOAK_CLIENT_SECRET_REST=qnuIVavwKVKLLK712jlxMKOiKm32YHKk
+      - KEYCLOAK_GRANT_TYPE=client_credentials
+      - KEYCLOAK_REALM_NAME=brm
+      - KEYCLOAK_USERNAME=rest-client
+      - JWT_SECRET=my_secret
+      - JWT_ALGORITHM_FOR_TOKEN=HS256
+      - SIGNIN_REDIRECT_ALLOWED_HOSTS=brm.marutisuzukidataverse.com,localhost
+      - OPENAPI_BASE_SCHEMA=dist/api.schema.yml
+      - POSTGRES_DATABASE_URL=postgresql://brm_user:brm_password@172.31.96.186:5432/brm
+ 
+  powerbi-embed-service:
+    container_name: brm-powerbi-embed-service
+    build:
+      context: ../brm-powerbi-embed-service
+      dockerfile: Dockerfile
+    ports:
+      - "7006:7006"
+    restart: unless-stopped
+    environment:
+      - APP_NAME=brm-powerbi-embed-service
+      - NODE_ENV=production
+      - PORT=7006
+      - LOGGER_LOG_LEVEL=debug
+      - SERVER_SHUTDOWN_GRACE_PERIOD_MS=2000
+      - AUTH_SUCCESS_REDIRECT_URL=https://brm.marutisuzukidataverse.com
+      - AUTH_FAILURE_REDIRECT_URL=https://brm.marutisuzukidataverse.com/api/auth/sign-in
+      - AUTH_COOKIE_DOMAIN=brm.marutisuzukidataverse.com
+      - AUTH_COOKIE_SECURE=true
+      - JWT_ISSUER=https://brm.marutisuzukidataverse.com/keycloak/realms/brm
+      - JWT_JWKS_URI=https://brm.marutisuzukidataverse.com/keycloak/realms/brm/protocol/openid-connect/certs
+      - JWT_SECRET="my_secret"
+      - JWT_ALGORITHM_FOR_TOKEN='HS256'
+      - KEYCLOAK_OIDC_CONNFIG_ENDPOINT=https://brm.marutisuzukidataverse.com/keycloak/realms/brm/.well-known/openid-configuration
+      - KEYCLOAK_CLIENT_ID=brm
+      - KEYCLOAK_CLIENT_SECRET=cXyIy9JBcAeH6K4rPAHLFGnB5EfCvs7V
+      - KEYCLOAK_REDIRECT_URI=https://brm.marutisuzukidataverse.com/api/auth/callback
+      - KEYCLOAK_AUTH_SCOPES=openid email profile
+      - KEYCLOAK_BASE_URL=https://brm.marutisuzukidataverse.com/keycloak
+      - KEYCLOAK_CLIENT_ID_REST=rest-client
+      - KEYCLOAK_CLIENT_SECRET_REST=qnuIVavwKVKLLK712jlxMKOiKm32YHKk
+      - KEYCLOAK_GRANT_TYPE=client_credentials
+      - KEYCLOAK_REALM_NAME=brm
+      - KEYCLOAK_USERNAME=rest-client
+      - JWT_SECRET=my_secret
+      - JWT_ALGORITHM_FOR_TOKEN=HS256
+      - SIGNIN_REDIRECT_ALLOWED_HOSTS=brm.marutisuzukidataverse.com,localhost
+      - OPENAPI_BASE_SCHEMA=dist/api.schema.yml
+      - POSTGRES_DATABASE_URL=postgresql://brm_user:brm_password@172.31.96.186:5432/brm
+ 
+  data-upload-service:
+    container_name: brm-data-upload-service
+    build:
+      context: ../brm-data-upload-service
+      dockerfile: Dockerfile
+    ports:
+      - "7007:7007"
+    restart: unless-stopped
+    environment:
+      - APP_NAME=brm-data-upload-service
+      - NODE_ENV=production
+      - PORT=7007
+      - LOGGER_LOG_LEVEL=debug
+      - SERVER_SHUTDOWN_GRACE_PERIOD_MS=2000
+      - AUTH_SUCCESS_REDIRECT_URL=https://brm.marutisuzukidataverse.com
+      - AUTH_FAILURE_REDIRECT_URL=https://brm.marutisuzukidataverse.com/api/auth/sign-in
+      - AUTH_COOKIE_DOMAIN=brm.marutisuzukidataverse.com
+      - AUTH_COOKIE_SECURE=true
+      - JWT_ISSUER=https://brm.marutisuzukidataverse.com/keycloak/realms/brm
+      - JWT_JWKS_URI=https://brm.marutisuzukidataverse.com/keycloak/realms/brm/protocol/openid-connect/certs
+      - JWT_SECRET="my_secret"
+      - JWT_ALGORITHM_FOR_TOKEN='HS256'
+      - KEYCLOAK_OIDC_CONNFIG_ENDPOINT=https://brm.marutisuzukidataverse.com/keycloak/realms/brm/.well-known/openid-configuration
+      - KEYCLOAK_CLIENT_ID=brm
+      - KEYCLOAK_CLIENT_SECRET=cXyIy9JBcAeH6K4rPAHLFGnB5EfCvs7V
+      - KEYCLOAK_REDIRECT_URI=https://brm.marutisuzukidataverse.com/api/auth/callback
+      - KEYCLOAK_AUTH_SCOPES=openid email profile
+      - KEYCLOAK_BASE_URL=https://brm.marutisuzukidataverse.com/keycloak
+      - KEYCLOAK_CLIENT_ID_REST=rest-client
+      - KEYCLOAK_CLIENT_SECRET_REST=qnuIVavwKVKLLK712jlxMKOiKm32YHKk
+      - KEYCLOAK_GRANT_TYPE=client_credentials
+      - KEYCLOAK_REALM_NAME=brm
+      - KEYCLOAK_USERNAME=rest-client
+      - JWT_SECRET=my_secret
+      - JWT_ALGORITHM_FOR_TOKEN=HS256
+      - SIGNIN_REDIRECT_ALLOWED_HOSTS=brm.marutisuzukidataverse.com,localhost
+      - OPENAPI_BASE_SCHEMA=dist/api.schema.yml
+      - POSTGRES_DATABASE_URL=postgresql://brm_user:brm_password@172.31.96.186:5432/brm
+      - BRM_S3_BUCKET_NAME=brm-dev-bucket
+      - BRM_S3_AWS_REGION=us-east-1
+      - BRM_S3_AWS_ACCESS_KEY_ID=AKIAW3NPNZRKC7MMG54I
+      - BRM_S3_AWS_SECRET_ACCESS_KEY=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
+      - WORKFLOW_SERVICE_PATH=http://workflow-service:7008
+      - WIDGET_SERVICE_PATH=http://widget-service:7003
+ 
+  workflow-service:
+    container_name: brm-workflow-service
+    build:
+      context: ../brm-workflow-service
+      dockerfile: Dockerfile
+    ports:
+      - "7008:7008"
+    restart: unless-stopped
+    environment:
+      - APP_NAME=brm-workflow-service
+      - NODE_ENV=production
+      - PORT=7008
+      - LOGGER_LOG_LEVEL=debug
+      - SERVER_SHUTDOWN_GRACE_PERIOD_MS=2000
+      - AUTH_SUCCESS_REDIRECT_URL=https://brm.marutisuzukidataverse.com
+      - AUTH_FAILURE_REDIRECT_URL=https://brm.marutisuzukidataverse.com/api/auth/sign-in
+      - AUTH_COOKIE_DOMAIN=brm.marutisuzukidataverse.com
+      - AUTH_COOKIE_SECURE=true
+      - JWT_ISSUER=https://brm.marutisuzukidataverse.com/keycloak/realms/brm
+      - JWT_JWKS_URI=https://brm.marutisuzukidataverse.com/keycloak/realms/brm/protocol/openid-connect/certs
+      - JWT_SECRET="my_secret"
+      - JWT_ALGORITHM_FOR_TOKEN='HS256'
+      - KEYCLOAK_OIDC_CONNFIG_ENDPOINT=https://brm.marutisuzukidataverse.com/keycloak/realms/brm/.well-known/openid-configuration
+      - KEYCLOAK_CLIENT_ID=brm
+      - KEYCLOAK_CLIENT_SECRET=cXyIy9JBcAeH6K4rPAHLFGnB5EfCvs7V
+      - KEYCLOAK_REDIRECT_URI=https://brm.marutisuzukidataverse.com/api/auth/callback
+      - KEYCLOAK_AUTH_SCOPES=openid email profile
+      - KEYCLOAK_BASE_URL=https://brm.marutisuzukidataverse.com/keycloak
+      - KEYCLOAK_CLIENT_ID_REST=rest-client
+      - KEYCLOAK_CLIENT_SECRET_REST=qnuIVavwKVKLLK712jlxMKOiKm32YHKk
+      - KEYCLOAK_GRANT_TYPE=client_credentials
+      - KEYCLOAK_REALM_NAME=brm
+      - KEYCLOAK_USERNAME=rest-client
+      - JWT_SECRET=my_secret
+      - JWT_ALGORITHM_FOR_TOKEN=HS256
+      - SIGNIN_REDIRECT_ALLOWED_HOSTS=brm.marutisuzukidataverse.com,localhost
+      - OPENAPI_BASE_SCHEMA=dist/api.schema.yml
+      - POSTGRES_DATABASE_URL=postgresql://brm_user:brm_password@172.31.96.186:5432/brm
+ 
+  brm-service:
+    container_name: brm-details-service
+    build:
+      context: ../brm-details-service
+      dockerfile: Dockerfile
+    ports:
+      - "7009:7009"
+    restart: unless-stopped
+    environment:
+      - APP_NAME=brm-service
+      - NODE_ENV=production
+      - PORT=7009
+      - LOGGER_LOG_LEVEL=debug
+      - SERVER_SHUTDOWN_GRACE_PERIOD_MS=2000
+      - AUTH_SUCCESS_REDIRECT_URL=https://brm.marutisuzukidataverse.com
+      - AUTH_FAILURE_REDIRECT_URL=https://brm.marutisuzukidataverse.com/api/auth/sign-in
+      - AUTH_COOKIE_DOMAIN=brm.marutisuzukidataverse.com
+      - AUTH_COOKIE_SECURE=true
+      - JWT_ISSUER=https://brm.marutisuzukidataverse.com/keycloak/realms/brm
+      - JWT_JWKS_URI=https://brm.marutisuzukidataverse.com/keycloak/realms/brm/protocol/openid-connect/certs
+      - JWT_SECRET="my_secret"
+      - JWT_ALGORITHM_FOR_TOKEN='HS256'
+      - KEYCLOAK_OIDC_CONNFIG_ENDPOINT=https://brm.marutisuzukidataverse.com/keycloak/realms/brm/.well-known/openid-configuration
+      - KEYCLOAK_CLIENT_ID=brm
+      - KEYCLOAK_CLIENT_SECRET=cXyIy9JBcAeH6K4rPAHLFGnB5EfCvs7V
+      - KEYCLOAK_REDIRECT_URI=https://brm.marutisuzukidataverse.com/api/auth/callback
+      - KEYCLOAK_AUTH_SCOPES=openid email profile
+      - KEYCLOAK_BASE_URL=https://brm.marutisuzukidataverse.com/keycloak
+      - KEYCLOAK_CLIENT_ID_REST=rest-client
+      - KEYCLOAK_CLIENT_SECRET_REST=qnuIVavwKVKLLK712jlxMKOiKm32YHKk
+      - KEYCLOAK_GRANT_TYPE=client_credentials
+      - KEYCLOAK_REALM_NAME=brm
+      - KEYCLOAK_USERNAME=rest-client
+      - JWT_SECRET=my_secret
+      - JWT_ALGORITHM_FOR_TOKEN=HS256
+      - SIGNIN_REDIRECT_ALLOWED_HOSTS=brm.marutisuzukidataverse.com,localhost
+      - OPENAPI_BASE_SCHEMA=dist/api.schema.yml
+      - POSTGRES_DATABASE_URL=postgresql://brm_user:brm_password@172.31.96.186:5432/brm
+ 
+networks:
+  keycloak-and-db-network:
+    driver: bridge
+ 
+volumes:
+  postgres_data:
+    external: true
