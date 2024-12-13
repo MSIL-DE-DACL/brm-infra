@@ -1,0 +1,69 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: brm-env-config
+data:
+  ADMIN_SERVICE_PATH: http://admin-service:7004/
+  APP_NAME: brm-platform-app
+  AUTH_COOKIE_DOMAIN: brm.marutisuzukidataverse.com
+  AUTH_COOKIE_SECURE: "true"
+  AUTH_FAILURE_REDIRECT_URL: https://brm.marutisuzukidataverse.com/api/auth/sign-in
+  AUTH_SUCCESS_REDIRECT_URL: https://brm.marutisuzukidataverse.com
+  BRM_SERVICE_PATH: http://brm-service:7009/brm/
+  BRM_S3_AWS_ACCESS_KEY_ID: AKIAW3NPNZRKC7MMG54I
+  BRM_S3_AWS_REGION: us-east-1
+  BRM_S3_AWS_SECRET_ACCESS_KEY: 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
+  BRM_S3_BUCKET_NAME: brm-dev-bucket
+  DATA_UPLOAD_SERVICE: https://brm.marutisuzukidataverse.com/
+  ENVIRONMENT: production
+  JWT_ALGORITHM_FOR_TOKEN: HS256
+  JWT_ISSUER: https://brm.marutisuzukidataverse.com/keycloak/realms/brm
+  JWT_JWKS_URI: https://brm.marutisuzukidataverse.com/keycloak/realms/brm/protocol/openid-connect/certs
+  JWT_SECRET: my_secret
+  KEYCLOAK_AUTH_SCOPES: openid email profile
+  KEYCLOAK_BASE_URL: https://brm.marutisuzukidataverse.com/keycloak
+  KEYCLOAK_CLIENT_ID: brm
+  KEYCLOAK_CLIENT_ID_REST: rest-client
+  KEYCLOAK_CLIENT_SECRET: cXyIy9JBcAeH6K4rPAHLFGnB5EfCvs7V
+  KEYCLOAK_CLIENT_SECRET_REST: qnuIVavwKVKLLK712jlxMKOiKm32YHKk
+  KEYCLOAK_GRANT_TYPE: client_credentials
+  KEYCLOAK_OIDC_CONNFIG_ENDPOINT: https://brm.marutisuzukidataverse.com/keycloak/realms/brm/.well-known/openid-configuration
+  KEYCLOAK_REALM_NAME: brm
+  KEYCLOAK_REDIRECT_URI: https://brm.marutisuzukidataverse.com/api/auth/callback
+  KEYCLOAK_USERNAME: rest-client
+  KEYCLOAK_DB: postgres
+  KEYCLOAK_DB_PASSWORD: brm_password
+  KEYCLOAK_DB_URL: jdbc:postgresql://postgres:5432/brm_db
+  KEYCLOAK_DB_USERNAME: brm_user
+  KEYCLOAK_HOSTNAME: https://brm.marutisuzukidataverse.com/keycloak
+  KEYCLOAK_HTTP_RELATIVE_PATH: /keycloak
+  KEYCLOAK_PROXY: edge
+  KEYCLOAK_ADMIN_USERNAME: admin
+  KEYCLOAK_ADMIN_PASSWORD: Us!ngBRM
+  KEYCLOAK_IMAGE_VERSION: 26.0
+  LOGGER_LOG_LEVEL: debug
+  LOGIN_API_PATH: https://brm.marutisuzukidataverse.com/api/auth/sign-in
+  LOGOUT_API_PATH: https://brm.marutisuzukidataverse.com/api/auth/sign-out
+  LOGOUT_REDIRECT_PATH: https://brm.marutisuzukidataverse.com/
+  NODE_ENV: production
+  NOTIFICATION_SERVICE: http://notification-service:7005/
+  OPENAPI_BASE_SCHEMA: dist/api.schema.yml
+  PORT_FRONTEND: "8080"
+  PORT_NOTIFICATION: "7005"
+  PORT_POWERBI: "7006"
+  POSTGRES_DATABASE_URL: postgresql://brm_user:brm_password@172.31.96.186:5432/brm
+  POSTGRES_DB: brm_db
+  POSTGRES_PASSWORD: brm_password
+  POSTGRES_USER: brm_user
+  REFRESH_API_PATH: https://brm.marutisuzukidataverse.com/api/auth/refresh
+  SERVER_SHUTDOWN_GRACE_PERIOD_MS: "2000"
+  SIGNIN_REDIRECT_ALLOWED_HOSTS: brm.marutisuzukidataverse.com,localhost
+  USER_INFO_API_PATH: https://brm.marutisuzukidataverse.com/api/auth/user-info
+  USER_LIST_API_PATH: https://brm.marutisuzukidataverse.com/api/admin/get-user-list
+  WIDGET_SERVICE_PATH: http://widget-service:7003/
+  WORKFLOW_SERVICE: http://workflow-service:7008/
+  WIDGET_SERVICE_APP_NAME: brm-widget
+  WIDGET_SERVICE_PORT: "7003"
+  WORKFLOW_SERVICE_APP_NAME: brm-workflow-service
+  WORKFLOW_SERVICE_PORT: "7008"
+

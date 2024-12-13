@@ -25,11 +25,20 @@ spec:
       containers:
         - env:
             - name: POSTGRES_DB
-              value: brm_db
+              valueFrom:
+                configMapKeyRef:
+                  name: brm-env-config
+                  key: POSTGRES_DB
             - name: POSTGRES_PASSWORD
-              value: brm_password
+              valueFrom:
+                configMapKeyRef:
+                  name: brm-env-config
+                  key: POSTGRES_PASSWORD
             - name: POSTGRES_USER
-              value: brm_user
+              valueFrom:
+                configMapKeyRef:
+                  name: brm-env-config
+                  key: POSTGRES_USER
           image: postgres:16.0
           name: brm-postgres
           ports:

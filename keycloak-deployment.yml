@@ -27,24 +27,52 @@ spec:
             - start
           env:
             - name: KC_DB
-              value: postgres
+              valueFrom:
+                configMapKeyRef:
+                  name: brm-env-config
+                  key: KEYCLOAK_DB
             - name: KC_DB_PASSWORD
-              value: brm_password
+              valueFrom:
+                configMapKeyRef:
+                  name: brm-env-config
+                  key: KEYCLOAK_DB_PASSWORD
             - name: KC_DB_URL
-              value: jdbc:postgresql://postgres:5432/brm_db
+              valueFrom:
+                configMapKeyRef:
+                  name: brm-env-config
+                  key: KEYCLOAK_DB_URL
             - name: KC_DB_USERNAME
-              value: brm_user
+              valueFrom:
+                configMapKeyRef:
+                  name: brm-env-config
+                  key: KEYCLOAK_DB_USERNAME
             - name: KC_HOSTNAME
-              value: https://brm.marutisuzukidataverse.com/keycloak
+              valueFrom:
+                configMapKeyRef:
+                  name: brm-env-config
+                  key: KEYCLOAK_HOSTNAME
             - name: KC_HTTP_RELATIVE_PATH
-              value: /keycloak
+              valueFrom:
+                configMapKeyRef:
+                  name: brm-env-config
+                  key: KEYCLOAK_HTTP_RELATIVE_PATH
             - name: KC_PROXY
-              value: edge
+              valueFrom:
+                configMapKeyRef:
+                  name: brm-env-config
+                  key: KEYCLOAK_PROXY
             - name: KEYCLOAK_ADMIN
-              value: admin
+              valueFrom:
+                configMapKeyRef:
+                  name: brm-env-config
+                  key: KEYCLOAK_ADMIN_USERNAME
             - name: KEYCLOAK_ADMIN_PASSWORD
-              value: Us!ngBRM
-          image: keycloak/keycloak:26.0
+              valueFrom:
+                configMapKeyRef:
+                  name: brm-env-config
+                  key: KEYCLOAK_ADMIN_PASSWORD
+          image: keycloak/keycloak:{{ .Values.keycloak.image.tag }}
+          imagePullPolicy: IfNotPresent
           name: brm-keycloak
           ports:
             - containerPort: 8080
