@@ -18,7 +18,7 @@ spec:
        - name: microservice-1
          image: nginx:latest
          ports:
-           - containerPort: 7001
+           - containerPort: 80
 ---
 apiVersion: v1
 kind: Service
@@ -33,4 +33,4 @@ spec:
  ports:
    - protocol: TCP
      port: 80
-     targetPort: 7001
+     targetPort: 80
