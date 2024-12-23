@@ -1,26 +1,27 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
- name: internal-app-ingress
- annotations:
-  nginx.ingress.kubernetes.io/rewrite-target: /
-  nginx.ingress.kubernetes.io/ssl-redirect: "false"
+  name: internal-app-ingress
+  namespace: default
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
 spec:
- ingressClassName: nginx
- rules:
-     http:
-       paths:
-         - path: /service1
-           pathType: Prefix
-           backend:
-             service:
-               name: microservice-1
-               port:
-                 number: 80
-         - path: /service2
-           pathType: Prefix
-           backend:
-             service:
-               name: microservice-2
-               port:
-                 number: 80
+  ingressClassName: nginx
+  rules:
+  - http:
+      paths:
+      - path: /service1
+        pathType: Prefix
+        backend:
+          service:
+            name: microservice-1
+            port:
+              number: 80
+      - path: /service2
+        pathType: Prefix
+        backend:
+          service:
+            name: microservice-2
+            port:
+              number: 80
