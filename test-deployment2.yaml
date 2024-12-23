@@ -18,7 +18,16 @@ spec:
        - name: microservice-2
          image: nginx:latest
          ports:
-           - containerPort: 7002
+           - containerPort: 7003
+         volumeMounts:
+           - name: nginx-config
+             mountPath: /etc/nginx/nginx.conf
+             subPath: nginx.conf
+       volumes:
+         - name: nginx-config
+           configMap:
+             name: custom-nginx-config
+        
 ---
 apiVersion: v1
 kind: Service
@@ -33,4 +42,4 @@ spec:
  ports:
    - protocol: TCP
      port: 80
-     targetPort: 7002
+     targetPort: 7003
