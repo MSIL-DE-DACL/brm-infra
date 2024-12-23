@@ -3,7 +3,7 @@ kind: Ingress
 metadata:
  name: internal-app-ingress
  annotations:
-nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/rewrite-target: /
 spec:
  rules:
    - host: aaca667482d5c4a97ae4a0644c50cc18-b20e3fdfc3d29c0e.elb.ap-south-1.amazonaws.com
