@@ -1,28 +1,25 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: example-ingress
-  annotations:
-    nginx.ingress.kubernetes.io/ssl-redirect: "false"
-    nginx.ingress.kubernetes.io/force-ssl-redirect: "false"
+ name: internal-app-ingress
+ annotations:
     nginx.ingress.kubernetes.io/rewrite-target: /
 spec:
-  ingressClassName: nginx
-  rules:
-  - host: aaca667482d5c4a97ae4a0644c50cc18-b20e3fdfc3d29c0e.elb.ap-south-1.amazonaws.com
-    http:
-      paths:
-        - path: /apple
-          pathType: Prefix
-          backend:
-            service:
-              name: apple-service
-              port:
-                number: 5678
-        - path: /banana
-          pathType: Prefix
-          backend:
-            service:
-              name: banana-service
-              port:
-                number: 5678
+ rules:
+   - host: aaca667482d5c4a97ae4a0644c50cc18-b20e3fdfc3d29c0e.elb.ap-south-1.amazonaws.com
+     http:
+       paths:
+         - path: /service1
+           pathType: Prefix
+           backend:
+             service:
+               name: microservice-1
+               port:
+                 number: 80
+         - path: /service2
+           pathType: Prefix
+           backend:
+             service:
+               name: microservice-2
+               port:
+                 number: 80
