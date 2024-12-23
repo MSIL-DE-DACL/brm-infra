@@ -1,0 +1,25 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+ name: internal-app-ingress
+ annotations:
+nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+ rules:
+   - host: ac6e1359b2f80431d8d0171c26017e5d-9f0c1810432a9881.elb.ap-south-1.amazonaws.com
+     http:
+       paths:
+         - path: /service1
+           pathType: Prefix
+           backend:
+             service:
+               name: microservice-1
+               port:
+                 number: 7000
+         - path: /service2
+           pathType: Prefix
+           backend:
+             service:
+               name: microservice-2
+               port:
+                 number: 7001
