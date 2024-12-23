@@ -3,23 +3,25 @@ kind: Ingress
 metadata:
   name: example-ingress
   annotations:
-      nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/rewrite-target: /
 spec:
   rules:
-    - host: aaca667482d5c4a97ae4a0644c50cc18-b20e3fdfc3d29c0e.elb.ap-south-1.amazonaws.com
-      http:
-        paths:
-          - path: /apple
-            pathType: Prefix
-            backend:
-              service:
-                name: apple-service
-                port:
-                  number: 5678
-          - path: /banana
-            pathType: Prefix
-            backend:
-              service:
-                name: banana-service
-                port:
-                  number: 5678
+  - host: aaca667482d5c4a97ae4a0644c50cc18-b20e3fdfc3d29c0e.elb.ap-south-1.amazonaws.com
+    http:
+      paths:
+        - path: /apple
+          pathType: Prefix
+          backend:
+            service:
+              name: apple-service
+              port:
+                number: 5678
+        - path: /banana
+          pathType: Prefix
+          backend:
+            service:
+              name: banana-service
+              port:
+                number: 5678
