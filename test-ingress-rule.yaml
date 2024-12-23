@@ -15,11 +15,11 @@ spec:
              service:
                name: microservice-1
                port:
-                 number: 7000
+                 number: 80
          - path: /service2
            pathType: Prefix
            backend:
              service:
                name: microservice-2
                port:
-                 number: 7001
+                 number: 80
