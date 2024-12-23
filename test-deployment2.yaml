@@ -1,36 +1,24 @@
-apiVersion: apps/v1
-kind: Deployment
-metadata:
- name: microservice-2
- labels:
-   app: microservice-2
-spec:
- replicas: 1
- selector:
-   matchLabels:
-     app: microservice-2
- template:
-   metadata:
-     labels:
-       app: microservice-2
-   spec:
-     containers:
-       - name: microservice-2
-         image: nginx:latest
-         ports:
-           - containerPort: 7002
----
+kind: Pod
 apiVersion: v1
-kind: Service
 metadata:
- name: microservice-2
- labels:
-   app: microservice-2
+  name: banana-app
+  labels:
+    app: banana
 spec:
- type: ClusterIP
- selector:
-   app: microservice-2
- ports:
-   - protocol: TCP
-     port: 80
-     targetPort: 7002
+  containers:
+    - name: banana-app
+      image: hashicorp/http-echo
+      args:
+        - "-text=banana"
+
+---
+
+kind: Service
+apiVersion: v1
+metadata:
+  name: banana-service
+spec:
+  selector:
+    app: banana
+  ports:
+    - port: 5678 # Default port for image
