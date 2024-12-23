@@ -1,24 +1,36 @@
-kind: Pod
-apiVersion: v1
+apiVersion: apps/v1
+kind: Deployment
 metadata:
-  name: apple-app
-  labels:
-    app: apple
+ name: microservice-1
+ labels:
+   app: microservice-1
 spec:
-  containers:
-    - name: apple-app
-      image: hashicorp/http-echo
-      args:
-        - "-text=apple"
-
+ replicas: 1
+ selector:
+   matchLabels:
+     app: microservice-1
+ template:
+   metadata:
+     labels:
+       app: microservice-1
+   spec:
+     containers:
+       - name: microservice-1
+         image: nginx:latest
+         ports:
+           - containerPort: 7001
 ---
-
-kind: Service
 apiVersion: v1
+kind: Service
 metadata:
-  name: apple-service
+ name: microservice-1
+ labels:
+   app: microservice-1
 spec:
-  selector:
-    app: apple
-  ports:
-    - port: 5678 # Default port for image
+ type: ClusterIP
+ selector:
+   app: microservice-1
+ ports:
+   - protocol: TCP
+     port: 80
+     targetPort: 7001
