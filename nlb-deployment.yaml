@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+ name: brm-internal-nlb
+ labels:
+   app: brm-nlb
+spec:
+ replicas: 3
+ selector:
+   matchLabels:
+     app: brm-nlb
+ template:
+   metadata:
+     labels:
+       app: brm-nlb
+   spec:
+     containers:
+       - name: brm-nlb
+         image: nginx:latest
+         ports:
+           - containerPort: 80
+           - containerPort: 443
