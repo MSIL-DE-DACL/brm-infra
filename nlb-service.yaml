@@ -6,8 +6,6 @@ metadata:
  annotations:
    service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
    service.beta.kubernetes.io/aws-load-balancer-internal: "true"
- labels:
-   app: ingress-nginx
 spec:
  type: LoadBalancer
  selector:
